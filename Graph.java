@@ -100,7 +100,7 @@ public class Graph{
         return newVertex;
     }
 
-    //Creates and returns a new edge from vertex u to vertex v, storing the weigh; an error occurs if there already exists an edge from u to v
+    //Creates and returns a new edge from vertex u to vertex v, storing the weight; an error occurs if there already exists an edge from u to v
     public Edge insertEdge(Vertex u, Vertex v, int weight){
         Edge newEdge = new Edge(v, weight);
         adjacencyList.get(u.getVertexNumber()).add(newEdge);
