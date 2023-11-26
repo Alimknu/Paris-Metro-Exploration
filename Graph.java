@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 public class Graph{
 
@@ -102,8 +101,9 @@ public class Graph{
 
     //Creates and returns a new edge from vertex u to vertex v, storing the weight; an error occurs if there already exists an edge from u to v
     public Edge insertEdge(Vertex u, Vertex v, int weight){
-        Edge newEdge = new Edge(v, weight);
-        adjacencyList.get(u.getVertexNumber()).add(newEdge);
+        Edge newEdge = new Edge(u, v, weight);
+        ArrayList<Edge> edges = adjacencyList.get(u.getVertexNumber());
+        edges.add(newEdge);
 
         return newEdge;
     }
