@@ -1,13 +1,13 @@
 public class Edge {
-    int destinationVertex;
+    Vertex destinationVertex;
     int weight;
     
-    public Edge(int destinationVertex, int weight){
+    public Edge(Vertex destinationVertex, int weight){
         this.destinationVertex = destinationVertex;
         this.weight = weight;
     }
 
-    public int getdestinationVertex(){
+    public Vertex getdestinationVertex(){
         return destinationVertex;
     }
 
