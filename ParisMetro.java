@@ -3,7 +3,6 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Scanner;
 
@@ -118,7 +117,44 @@ public class ParisMetro {
 
     }
 
-    //Method to print out each vertice in the graph and its outgoing edges
+    // Find the shortest path between two stations when we have the information that one given line is not functioning (the line is identified by one of its endpoints). The same type of information will be printed as in ii).
+    // This will be done with modifications to Dijkstra's algorithm from ii)
+    public static Pair<ArrayList<Vertex>, Integer> shortestPathWithBrokenLine(Graph metro, Vertex originStation, Vertex destinationStation, Vertex brokenStation){
+        int[] distance = new int[metro.numVertices()]; //Array to store the distance from the origin station to each station
+        ArrayList<Vertex> previous = new ArrayList<>(Collections.nCopies(metro.numVertices(), null)); //Array to store the previous station in the shortest path to each station, setting each value to null in order to have each spot filled with a value later
+        PriorityQueue<Vertex> pq = new PriorityQueue<>((v1,v2) -> Integer.compare(distance[v1.getVertexNumber()], distance[v2.getVertexNumber()]));
+
+        Arrays.fill(distance, Integer.MAX_VALUE); //Set all distances to infinity
+        distance[originStation.getVertexNumber()] = 0; //Set the distance from the origin station to itself to 0
+        pq.add(originStation);
+
+        while (!pq.isEmpty()){
+            Vertex currentStation = pq.poll();
+            for (Edge e : metro.outgoingEdges(currentStation)){
+                Vertex nearbyStation = e.getdestinationVertex();
+                int edgeWeight = e.getWeight() < 0 ? 90 : e.getWeight(); //Sets the weight to 90 on edges that aren't on the same line
+                if (e.getdestinationVertex() == brokenStation){
+                    edgeWeight = Integer.MAX_VALUE; //Sets the weight to infinity on edges that are on the broken line so we don't use it
+                }
+                long newDistance = (long) distance[currentStation.getVertexNumber()] + edgeWeight; //Had to use long here to avoid overflow
+                if (newDistance < distance[nearbyStation.getVertexNumber()]){
+                    distance[nearbyStation.getVertexNumber()] = (int) newDistance; //Cast back to int
+                    previous.set(nearbyStation.getVertexNumber(), currentStation);
+                    pq.add(nearbyStation);
+                }
+            }
+        }
+
+        ArrayList<Vertex> shortestPath = new ArrayList<>();
+        for (Vertex v = destinationStation; v != null; v = previous.get(v.getVertexNumber())){
+            shortestPath.add(0, v); //Adds to the beginning of the arrayList so that the path is in order
+        }
+    
+        return new Pair<>(shortestPath, distance[destinationStation.getVertexNumber()]);
+
+    }
+
+    //Method to print out each vertice in the graph and its outgoing edges, used for troubleshooting
     public static void printGraph(Graph metro) {
         for (Vertex v : metro.vertices()) {
             System.out.print(v.getVertexNumber() + ": ");
@@ -132,25 +168,49 @@ public class ParisMetro {
     public static void main(String[] args) {
         ParisMetro metro = new ParisMetro();
         metro.parisMetro = readMetro("metro.txt");
-        System.out.println(metro.parisMetro.getVertex(0).getStationName());
-        System.out.println("Space");
-        System.out.println(metro.parisMetro.getVertex(28).getStationName());
-        System.out.println("Space");
-        ArrayList<Vertex> sameLine = sameLine(metro.parisMetro, metro.parisMetro.getVertex(0));
-        System.out.println("sameline test:");
-        //for (Vertex v: sameLine){
-        //    System.out.print(v.getVertexNumber() + " ");
-        //}
-
-        System.out.println("Space");
-        Pair<ArrayList<Vertex>, Integer> shortestPath = shortestPath(metro.parisMetro, metro.parisMetro.getVertex(0), metro.parisMetro.getVertex(42));
-        for (Vertex v : shortestPath.getKey()){
-            System.out.print(v.getVertexNumber() + " ");
+        
+        if (args.length < 1 || args.length > 3){
+            System.out.println("Invalid number of arguments. Please provide 1 to 3 station numbers in the following format: N1 N2 N3. You may omit N2 or N3.");
+            return;
         }
-        System.out.println();
-        System.out.println("total travel time: " + shortestPath.getValue());
 
-        //printGraph(metro.parisMetro);
+        int N1 = Integer.parseInt(args[0]);
+        Vertex stationN1 = metro.parisMetro.getVertex(N1);
+
+        if (args.length == 1){ //Answer question 2 i)
+            ArrayList<Vertex> stationsOnSameLine = sameLine(metro.parisMetro, metro.parisMetro.getVertex(N1));
+            System.out.print("Stations on the same line as" + N1 + ": ");
+            for (Vertex v : stationsOnSameLine){
+                System.out.print(v.getVertexNumber() + " ");
+            }
+        }
+
+        else if (args.length == 2){ //Answer question 2 ii)
+            int N2 = Integer.parseInt(args[1]);
+            Vertex stationN2 = metro.parisMetro.getVertex(N2);
+            Pair<ArrayList<Vertex>, Integer> shortestPath = shortestPath(metro.parisMetro, stationN1, stationN2);
+            System.out.print("Shortest path from " + N1 + " to " + N2 + ": ");
+            for (Vertex v: shortestPath.getKey()){
+                System.out.print(v.getVertexNumber() + " ");
+            }
+            System.out.println();
+            System.out.println("Total travel time: " + shortestPath.getValue());
+        }
+
+        else { //Answer question 2 iii), can use else since I won't be implementing the bonus
+            int N2 = Integer.parseInt(args[1]);
+            int N3 = Integer.parseInt(args[2]);
+            Vertex stationN2 = metro.parisMetro.getVertex(N2);
+            Vertex stationN3 = metro.parisMetro.getVertex(N3);
+            Pair<ArrayList<Vertex>, Integer> shortestPathBrokenLine = shortestPathWithBrokenLine(metro.parisMetro, stationN1, stationN2, stationN3);
+            System.out.print("Shortest path from " + N1 + " to " + N2 + " with broken line " + N3 + ": ");
+            for (Vertex v : shortestPathBrokenLine.getKey()){
+                System.out.print(v.getVertexNumber() + " ");
+            }
+            System.out.println();
+            System.out.println("Total travel time: " + shortestPathBrokenLine.getValue());
+            
+        }
 
     
     }

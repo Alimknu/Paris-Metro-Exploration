@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 
+// Implementation of the graph ADT using adjacency list
+
 public class Graph{
 
     ArrayList<ArrayList<Edge>> adjacencyList;
