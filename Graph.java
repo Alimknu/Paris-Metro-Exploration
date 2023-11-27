@@ -16,9 +16,9 @@ public class Graph{
         return vertices.size();
     }
 
-    //Returns an iteration of all the vertices in the graph
-    public Iterator<Vertex> vertices(){
-        return vertices.iterator();
+    //Returns a list of all the vertices in the graph
+    public ArrayList<Vertex> vertices(){
+        return new ArrayList<>(vertices);
     }
 
     //Returns the number of edges in the graph
@@ -31,16 +31,14 @@ public class Graph{
         return numEdges;
     }
 
-    //Returns an iteration of all the edges in the graph
-    public Iterator<Edge> edges(){
+    //Returns a list of all the edges in the graph
+    public ArrayList<Edge> edges(){
         ArrayList<Edge> edges = new ArrayList<>();
         for(ArrayList<Edge> edgeList : adjacencyList){
-            for(Edge edge : edgeList){
-                edges.add(edge);
-            }
+            edges.addAll(edgeList);
         }
 
-        return edges.iterator();
+        return edges;
     }
 
     //Returns the edge from u to v, or null if they are not adjacent
