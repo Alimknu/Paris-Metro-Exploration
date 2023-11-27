@@ -45,10 +45,20 @@ public class Graph{
 
     //Returns the edge from u to v, or null if they are not adjacent
     public Edge getEdge(Vertex u, Vertex v){
-        ArrayList<Edge> edges = adjacencyList.get(u.getVertexNumber());
-        for(Edge edge : edges){
-            if(edge.getdestinationVertex().equals(v)){
+        for (Edge edge : adjacencyList.get(u.getVertexNumber())) {
+            if (edge.getdestinationVertex().equals(v)) {
                 return edge;
+            }
+        }
+
+        return null;
+    }
+
+    //Returns the vertex with the given number, or null if it doesn't exist
+    public Vertex getVertex(int vertexNumber){
+        for(Vertex vertex : vertices){
+            if(vertex.getVertexNumber() == vertexNumber){
+                return vertex;
             }
         }
 
@@ -85,9 +95,9 @@ public class Graph{
         return adjacencyList.get(v.getVertexNumber()).size();
     }
 
-    //Returns an iteration of all outgoing edges from vertex v
-    public Iterator<Edge> outgoingEdges(Vertex v){
-        return adjacencyList.get(v.getVertexNumber()).iterator();
+    //Returns a list of all outgoing edges from vertex v
+    public ArrayList<Edge> outgoingEdges(Vertex v){
+        return adjacencyList.get(v.getVertexNumber());
     }
 
     //Creates and returns a new Vertex storing the station's name
@@ -101,22 +111,37 @@ public class Graph{
 
     //Creates and returns a new edge from vertex u to vertex v, storing the weight; an error occurs if there already exists an edge from u to v
     public Edge insertEdge(Vertex u, Vertex v, int weight){
+        if(getEdge(u, v) != null || getEdge(v, u) != null){
+            throw new IllegalArgumentException("Edge already exists");
+        }
         Edge newEdge = new Edge(u, v, weight);
-        ArrayList<Edge> edges = adjacencyList.get(u.getVertexNumber());
-        edges.add(newEdge);
+        adjacencyList.get(u.getVertexNumber()).add(newEdge);
+        adjacencyList.get(v.getVertexNumber()).add(newEdge);
 
         return newEdge;
     }
 
     //Removes vertex v and all its incident edges from the graph
     public void removeVertex(Vertex v){
+        if(!vertices.contains(v)){
+            throw new IllegalArgumentException("Vertex does not exist");
+        }
+
         vertices.remove(v);
         adjacencyList.remove(v.getVertexNumber());
     }
 
     //Removes edge e from the graph
     public void removeEdge(Edge e){
-        ArrayList<Edge> edges = adjacencyList.get(e.getdestinationVertex().getVertexNumber());
-        edges.remove(e);
+
+        Vertex u = e.getOriginVertex();
+        Vertex v = e.getdestinationVertex();
+
+        if(!adjacencyList.get(u.getVertexNumber()).contains(e) || !adjacencyList.get(v.getVertexNumber()).contains(e)){
+            throw new IllegalArgumentException("Edge does not exist");
+        }
+
+        adjacencyList.get(u.getVertexNumber()).remove(e);
+        adjacencyList.get(v.getVertexNumber()).remove(e);
     }
 }

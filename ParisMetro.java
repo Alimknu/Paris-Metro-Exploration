@@ -1,6 +1,10 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Scanner;
 
 public class ParisMetro {
@@ -54,7 +58,7 @@ public class ParisMetro {
         return metroBuild;
     }
 
-    //Identify all the stations belonging to the same line of a given station. This will be implemented using BFS
+    //Identify all the stations belonging to the same line of a given station.
     public static void sameLine(Graph metro, Vertex station){
         Iterator<Edge> edgeIterator = metro.outgoingEdges(station);
         while(edgeIterator.hasNext()){
@@ -62,6 +66,43 @@ public class ParisMetro {
             Vertex destinationVertex = edge.getdestinationVertex();
             System.out.println(destinationVertex.getStationName());
         }
+    }
+
+    //Find the shortest path between any two stations, i.e. the path taking the minimum total time. Print all the stations of the path in order, and print the total travel time.
+    //This will be done with Dijkstra's algorithm
+    public static ArrayList<ArrayList<Vertex>> shortestPath(Graph metro, Vertex beginningStation, Vertex endingStation){
+        ArrayList<Vertex> cloud = new ArrayList<>();
+        ArrayList<Integer> distances = new ArrayList<>();
+        ArrayList<ArrayList<Vertex>> path = new ArrayList<>();
+        PriorityQueue<Vertex> q = new PriorityQueue<>();
+
+        for (Vertex station : metro.vertices) {
+            cloud.add(station);
+            distances.add(station.equals(beginningStation) ? 0 : Integer.MAX_VALUE);
+            path.add(station.equals(beginningStation) ? new ArrayList<>() : null);
+            q.add(station);
+        }
+
+        while (!q.isEmpty()){
+            Vertex u = q.poll();
+            Iterator<Edge> edgeIterator = metro.outgoingEdges(u);
+            while (edgeIterator.hasNext()){
+                Edge edge = edgeIterator.next();
+                Vertex z = metro.opposite(u, edge);
+                if (q.contains(z)){
+                    int newDistance = distances.get(cloud.indexOf(u)) + edge.getWeight();
+                    if (newDistance < distances.get(cloud.indexOf(z))) {
+                        distances.set(cloud.indexOf(z), newDistance);
+                        path.set(cloud.indexOf(z), path.get(cloud.indexOf(u)));
+                        path.get(cloud.indexOf(z)).add(z);
+                        q.remove(z);
+                        q.add(z);
+                    }
+                }
+            }
+        }
+
+        return path;
     }
     
     public static void main(String[] args) {
@@ -81,5 +122,7 @@ public class ParisMetro {
         */
 
         sameLine(metro.parisMetro, metro.parisMetro.vertices.get(0));
+        System.out.println("Space");
+        System.out.println(shortestPath(metro.parisMetro, metro.parisMetro.vertices.get(0), metro.parisMetro.vertices.get(56)));
     }
 }
