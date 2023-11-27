@@ -1,11 +1,9 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.PriorityQueue;
+import java.util.LinkedList;
 import java.util.Scanner;
+import java.util.Stack;
 
 public class ParisMetro {
     Graph parisMetro;
@@ -58,27 +56,50 @@ public class ParisMetro {
         return metroBuild;
     }
 
-    //Identify all the stations belonging to the same line of a given station.
+    //Identify all the stations belonging to the same line of a given station. Done with DFS
     public static ArrayList<Vertex> sameLine(Graph metro, Vertex station){
         ArrayList<Vertex> stationsOnSameLine = new ArrayList<>();
-        ArrayList<Edge> edges = metro.outgoingEdges(station);
+        boolean[] visited = new boolean[metro.numVertices()];
+        dfs(metro, station, stationsOnSameLine, visited);
+        return stationsOnSameLine;
+    }
 
+    //DFS implementation
+    private static void dfs(Graph metro, Vertex station, ArrayList<Vertex> stationsOnSameLine, boolean[] visited){
+        visited[station.getVertexNumber()] = true;
+        stationsOnSameLine.add(station);
+
+        ArrayList<Edge> edges = metro.outgoingEdges(station);
         for (Edge e: edges){
-            stationsOnSameLine.add(e.getdestinationVertex());
+            if (e.getWeight() == -1){
+                continue; //Skips edges with weight of -1 (edges that aren't on the same line)
+            }
+            Vertex destination = e.getdestinationVertex();
+            if (!visited[destination.getVertexNumber()]){
+                dfs(metro, destination, stationsOnSameLine, visited);
+            }
         }
 
-        return stationsOnSameLine;
     }
 
     //Find the shortest path between any two stations, i.e. the path taking the minimum total time. Print all the stations of the path in order, and print the total travel time.
     //This will be done with Dijkstra's algorithm
+    public static void shortestPath(Graph metro, Vertex startStation, Vertex endStation){
+
+    }
     
     public static void main(String[] args) {
         ParisMetro metro = new ParisMetro();
         metro.parisMetro = readMetro("metro.txt");
-        System.out.println(metro.parisMetro.vertices.get(0).getStationName());
-        
+        System.out.println(metro.parisMetro.getVertex(0).getStationName());
         System.out.println("Space");
-        //System.out.println(shortestPath(metro.parisMetro, metro.parisMetro.vertices.get(0), metro.parisMetro.vertices.get(56)));
+        System.out.println(metro.parisMetro.getVertex(56).getStationName());
+        System.out.println("Space");
+        ArrayList<Vertex> sameLine = sameLine(metro.parisMetro, metro.parisMetro.getVertex(0));
+        System.out.println("sameline test:");
+        for (Vertex v: sameLine){
+            System.out.print(v.getVertexNumber() + " ");
+        }
+        
     }
 }

@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Iterator;
 
 public class Graph{
 
@@ -109,12 +108,11 @@ public class Graph{
 
     //Creates and returns a new edge from vertex u to vertex v, storing the weight; an error occurs if there already exists an edge from u to v
     public Edge insertEdge(Vertex u, Vertex v, int weight){
-        if(getEdge(u, v) != null || getEdge(v, u) != null){
+        if(getEdge(u, v) != null){
             throw new IllegalArgumentException("Edge already exists");
         }
         Edge newEdge = new Edge(u, v, weight);
         adjacencyList.get(u.getVertexNumber()).add(newEdge);
-        adjacencyList.get(v.getVertexNumber()).add(newEdge);
 
         return newEdge;
     }
@@ -133,13 +131,11 @@ public class Graph{
     public void removeEdge(Edge e){
 
         Vertex u = e.getOriginVertex();
-        Vertex v = e.getdestinationVertex();
 
-        if(!adjacencyList.get(u.getVertexNumber()).contains(e) || !adjacencyList.get(v.getVertexNumber()).contains(e)){
+        if(!adjacencyList.get(u.getVertexNumber()).contains(e)){
             throw new IllegalArgumentException("Edge does not exist");
         }
 
         adjacencyList.get(u.getVertexNumber()).remove(e);
-        adjacencyList.get(v.getVertexNumber()).remove(e);
     }
 }
