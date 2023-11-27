@@ -124,6 +124,8 @@ public class ParisMetro {
         ArrayList<Vertex> previous = new ArrayList<>(Collections.nCopies(metro.numVertices(), null)); //Array to store the previous station in the shortest path to each station, setting each value to null in order to have each spot filled with a value later
         PriorityQueue<Vertex> pq = new PriorityQueue<>((v1,v2) -> Integer.compare(distance[v1.getVertexNumber()], distance[v2.getVertexNumber()]));
 
+        ArrayList<Vertex> brokenLineStations = sameLine(metro, brokenStation); //Gets all the stations on the broken line so we know toa void them
+
         Arrays.fill(distance, Integer.MAX_VALUE); //Set all distances to infinity
         distance[originStation.getVertexNumber()] = 0; //Set the distance from the origin station to itself to 0
         pq.add(originStation);
@@ -132,13 +134,13 @@ public class ParisMetro {
             Vertex currentStation = pq.poll();
             for (Edge e : metro.outgoingEdges(currentStation)){
                 Vertex nearbyStation = e.getdestinationVertex();
-                int edgeWeight = e.getWeight() < 0 ? 90 : e.getWeight(); //Sets the weight to 90 on edges that aren't on the same line
-                if (e.getdestinationVertex() == brokenStation){
-                    edgeWeight = Integer.MAX_VALUE; //Sets the weight to infinity on edges that are on the broken line so we don't use it
+                if (brokenLineStations.contains(nearbyStation)){ //Skips stations on the broken line
+                    continue;
                 }
-                long newDistance = (long) distance[currentStation.getVertexNumber()] + edgeWeight; //Had to use long here to avoid overflow
+                int edgeWeight = e.getWeight() < 0 ? 90 : e.getWeight(); //Sets the weight to 90 on edges that aren't on the same line
+                int newDistance = distance[currentStation.getVertexNumber()] + edgeWeight;
                 if (newDistance < distance[nearbyStation.getVertexNumber()]){
-                    distance[nearbyStation.getVertexNumber()] = (int) newDistance; //Cast back to int
+                    distance[nearbyStation.getVertexNumber()] = newDistance;
                     previous.set(nearbyStation.getVertexNumber(), currentStation);
                     pq.add(nearbyStation);
                 }
