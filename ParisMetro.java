@@ -41,8 +41,8 @@ public class ParisMetro {
                     int vertexNumber = Integer.parseInt(lineSplit[0]);
                     int destinationVertexNumber = Integer.parseInt(lineSplit[1]);
                     int weight = Integer.parseInt(lineSplit[2]);
-                    Vertex currentVertex = metroBuild.vertices.get(vertexNumber);
-                    Vertex destinationVertex = metroBuild.vertices.get(destinationVertexNumber);
+                    Vertex currentVertex = metroBuild.getVertex(vertexNumber);
+                    Vertex destinationVertex = metroBuild.getVertex(destinationVertexNumber);
                     metroBuild.insertEdge(currentVertex, destinationVertex, weight);
                 }
             }
@@ -59,70 +59,26 @@ public class ParisMetro {
     }
 
     //Identify all the stations belonging to the same line of a given station.
-    public static void sameLine(Graph metro, Vertex station){
-        Iterator<Edge> edgeIterator = metro.outgoingEdges(station);
-        while(edgeIterator.hasNext()){
-            Edge edge = edgeIterator.next();
-            Vertex destinationVertex = edge.getdestinationVertex();
-            System.out.println(destinationVertex.getStationName());
+    public static ArrayList<Vertex> sameLine(Graph metro, Vertex station){
+        ArrayList<Vertex> stationsOnSameLine = new ArrayList<>();
+        ArrayList<Edge> edges = metro.outgoingEdges(station);
+
+        for (Edge e: edges){
+            stationsOnSameLine.add(e.getdestinationVertex());
         }
+
+        return stationsOnSameLine;
     }
 
     //Find the shortest path between any two stations, i.e. the path taking the minimum total time. Print all the stations of the path in order, and print the total travel time.
     //This will be done with Dijkstra's algorithm
-    public static ArrayList<ArrayList<Vertex>> shortestPath(Graph metro, Vertex beginningStation, Vertex endingStation){
-        ArrayList<Vertex> cloud = new ArrayList<>();
-        ArrayList<Integer> distances = new ArrayList<>();
-        ArrayList<ArrayList<Vertex>> path = new ArrayList<>();
-        PriorityQueue<Vertex> q = new PriorityQueue<>();
-
-        for (Vertex station : metro.vertices) {
-            cloud.add(station);
-            distances.add(station.equals(beginningStation) ? 0 : Integer.MAX_VALUE);
-            path.add(station.equals(beginningStation) ? new ArrayList<>() : null);
-            q.add(station);
-        }
-
-        while (!q.isEmpty()){
-            Vertex u = q.poll();
-            Iterator<Edge> edgeIterator = metro.outgoingEdges(u);
-            while (edgeIterator.hasNext()){
-                Edge edge = edgeIterator.next();
-                Vertex z = metro.opposite(u, edge);
-                if (q.contains(z)){
-                    int newDistance = distances.get(cloud.indexOf(u)) + edge.getWeight();
-                    if (newDistance < distances.get(cloud.indexOf(z))) {
-                        distances.set(cloud.indexOf(z), newDistance);
-                        path.set(cloud.indexOf(z), path.get(cloud.indexOf(u)));
-                        path.get(cloud.indexOf(z)).add(z);
-                        q.remove(z);
-                        q.add(z);
-                    }
-                }
-            }
-        }
-
-        return path;
-    }
     
     public static void main(String[] args) {
         ParisMetro metro = new ParisMetro();
         metro.parisMetro = readMetro("metro.txt");
-        /* System.out.println(metro.parisMetro.numVertices());
+        System.out.println(metro.parisMetro.vertices.get(0).getStationName());
+        
         System.out.println("Space");
-        System.out.println(metro.parisMetro.numEdges());
-        System.out.println("Space");
-
-        Iterator<Edge> edgeIterator = metro.parisMetro.edges();
-        while (edgeIterator.hasNext()) {
-            Edge edge = edgeIterator.next();
-            System.out.println(edge.getdestinationVertex().getStationName());
-            System.out.println("Space");
-        }
-        */
-
-        sameLine(metro.parisMetro, metro.parisMetro.vertices.get(0));
-        System.out.println("Space");
-        System.out.println(shortestPath(metro.parisMetro, metro.parisMetro.vertices.get(0), metro.parisMetro.vertices.get(56)));
+        //System.out.println(shortestPath(metro.parisMetro, metro.parisMetro.vertices.get(0), metro.parisMetro.vertices.get(56)));
     }
 }
