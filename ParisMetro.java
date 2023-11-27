@@ -1,9 +1,11 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 import java.util.Scanner;
-import java.util.Stack;
 
 public class ParisMetro {
     Graph parisMetro;
@@ -84,8 +86,47 @@ public class ParisMetro {
 
     //Find the shortest path between any two stations, i.e. the path taking the minimum total time. Print all the stations of the path in order, and print the total travel time.
     //This will be done with Dijkstra's algorithm
-    public static void shortestPath(Graph metro, Vertex startStation, Vertex endStation){
+    public static Pair<ArrayList<Vertex>, Integer> shortestPath(Graph metro, Vertex originStation, Vertex destinationStation){
+        int[] distance = new int[metro.numVertices()]; //Array to store the distance from the origin station to each station
+        ArrayList<Vertex> previous = new ArrayList<>(Collections.nCopies(metro.numVertices(), null)); //Array to store the previous station in the shortest path to each station, setting each value to null in order to have each spot filled with a value later
+        PriorityQueue<Vertex> pq = new PriorityQueue<>((v1,v2) -> Integer.compare(distance[v1.getVertexNumber()], distance[v2.getVertexNumber()]));
 
+        Arrays.fill(distance, Integer.MAX_VALUE); //Set all distances to infinity
+        distance[originStation.getVertexNumber()] = 0; //Set the distance from the origin station to itself to 0
+        pq.add(originStation);
+
+        while (!pq.isEmpty()){
+            Vertex currentStation = pq.poll();
+            for (Edge e : metro.outgoingEdges(currentStation)){
+                Vertex nearbyStation = e.getdestinationVertex();
+                int edgeWeight = e.getWeight() < 0 ? 90 : e.getWeight(); //Sets the weight to 90 on edges that aren't on the same line
+                int newDistance = distance[currentStation.getVertexNumber()] + edgeWeight;
+                if (newDistance < distance[nearbyStation.getVertexNumber()]){
+                    distance[nearbyStation.getVertexNumber()] = newDistance;
+                    previous.set(nearbyStation.getVertexNumber(), currentStation);
+                    pq.add(nearbyStation);
+                }
+            }
+        }
+
+        ArrayList<Vertex> shortestPath = new ArrayList<>();
+        for (Vertex v = destinationStation; v != null; v = previous.get(v.getVertexNumber())){
+            shortestPath.add(0, v); //Adds to the beginning of the arrayList so that the path is in order
+        }
+    
+        return new Pair<>(shortestPath, distance[destinationStation.getVertexNumber()]);
+
+    }
+
+    //Method to print out each vertice in the graph and its outgoing edges
+    public static void printGraph(Graph metro) {
+        for (Vertex v : metro.vertices()) {
+            System.out.print(v.getVertexNumber() + ": ");
+            for (Edge e : metro.outgoingEdges(v)) {
+                System.out.print(e.getdestinationVertex().getVertexNumber() + " ");
+            }
+            System.out.println();
+        }
     }
     
     public static void main(String[] args) {
@@ -93,13 +134,24 @@ public class ParisMetro {
         metro.parisMetro = readMetro("metro.txt");
         System.out.println(metro.parisMetro.getVertex(0).getStationName());
         System.out.println("Space");
-        System.out.println(metro.parisMetro.getVertex(56).getStationName());
+        System.out.println(metro.parisMetro.getVertex(28).getStationName());
         System.out.println("Space");
         ArrayList<Vertex> sameLine = sameLine(metro.parisMetro, metro.parisMetro.getVertex(0));
         System.out.println("sameline test:");
-        for (Vertex v: sameLine){
+        //for (Vertex v: sameLine){
+        //    System.out.print(v.getVertexNumber() + " ");
+        //}
+
+        System.out.println("Space");
+        Pair<ArrayList<Vertex>, Integer> shortestPath = shortestPath(metro.parisMetro, metro.parisMetro.getVertex(0), metro.parisMetro.getVertex(42));
+        for (Vertex v : shortestPath.getKey()){
             System.out.print(v.getVertexNumber() + " ");
         }
-        
+        System.out.println();
+        System.out.println("total travel time: " + shortestPath.getValue());
+
+        //printGraph(metro.parisMetro);
+
+    
     }
 }
