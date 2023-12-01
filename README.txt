@@ -1,5 +1,7 @@
 P2 Coding Assignment - Paris Metro: Exploring the Paris Metro Subway Network
 
+There was no code given in this assignment
+
 Implemented Features:
 
 - Task 2 i) Finding all the stations on the same line (sameLine function)
